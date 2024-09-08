@@ -1,6 +1,20 @@
 {
   "name": "feeds",
   "version": "0.0.0",
+  "author": "whaoa",
+  "license": "MIT",
+  "homepage": "https://github.com/whaoa/feeds#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/whaoa/feeds.git"
+  },
+  "bugs": {
+    "url": "https://github.com/whaoa/feeds/issues"
+  },
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=9"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -8,18 +22,18 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "react": "^18",
-    "react-dom": "^18",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "next": "14.2.8"
   },
   "devDependencies": {
-    "typescript": "^5",
-    "@types/node": "^20",
+    "typescript": "^5.5.4",
+    "@types/node": "^18",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "postcss": "^8",
+    "postcss": "^8.4.45",
     "tailwindcss": "^3.4.1",
-    "eslint": "^8",
+    "eslint": "^8.57.0",
     "eslint-config-next": "14.2.8"
   }
 }
