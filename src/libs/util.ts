@@ -1,6 +1,11 @@
 import clsx from 'clsx';
+import { format } from 'date-fns';
 
 export const cn = clsx;
+
+export function formatDate(date: string | number | Date, formatStr = 'yyyy-MM-dd HH:mm') {
+  return format(date, formatStr);
+}
 
 export function request(url: string | URL | Request, options?: RequestInit) {
   const request = fetch(url, options).then((resp) => {

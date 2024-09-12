@@ -29,7 +29,7 @@ export function HeaderNavLink(props: HeaderNavLinkProps) {
       </span>
       <hr
         className={cn(
-          'absolute left-0 right-0 bottom-0 mx-auto w-4/5 bg-primary transition-[height]',
+          'absolute left-0 right-0 bottom-0 border-none mx-auto w-4/5 bg-primary transition-[height]',
           isActive ? 'h-1' : 'h-0',
         )}
       />

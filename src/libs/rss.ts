@@ -1,8 +1,9 @@
 import 'server-only';
+import { load } from 'cheerio';
 
 import { request } from '@/libs/util';
 
-import type { RSSFeed } from '@/types/rss';
+import type { RSSFeedItem } from '@/types/rss';
 
 interface RSSHubInstance {
   host: string;
@@ -61,6 +62,31 @@ function createRSSInstanceResolver(expires = 60 * 30) {
 
 const resolveInstance = createRSSInstanceResolver();
 
+function tryToPatchFeedItems(items: RSSFeedItem[]) {
+  const tag = 'feed-block';
+
+  const doc = items.map((item, index) => (
+    (item.description && /<[a-z]/i.test(item.description))
+      ? `<${tag} data-index="${index}">${item.description}</${tag}>`
+      : ''
+  )).join('');
+
+  if (doc) {
+    const $ = load(doc);
+    $('feed-block').each((_, el) => {
+      const node = $(el);
+      const item = items[Number(node.data('index'))];
+      if (item) {
+        item.image = node.find('img, .hupu-img').first().attr('src');
+        item.description = node.contents().toArray()
+          .map((el) => $(el).text().trim())
+          .filter(Boolean)
+          .join('\n');
+      }
+    });
+  }
+}
+
 interface RSSHubFeed {
   title: string;
   description: string;
@@ -75,28 +101,34 @@ interface RSSHubFeed {
   }>;
 }
 
-export async function fetchRSSFeed(route: string): Promise<RSSFeed> {
+export async function fetchRSSFeed(route: string) {
   route = (route || '').replace(/^\//, '').split('?')[0];
   if (!route) {
     throw new Error('loadFeed: route must be provided');
   }
+
   const instance = await resolveInstance();
-  const response = await request(`${instance.host}/${route}?format=json`, {
+  const response = await request(`${instance.host}/${route}?limit=50&format=json`, {
     next: { revalidate: 60 * 3, tags: ['rss', route] },
   });
   const feed = await response.json<RSSHubFeed>();
-  return {
+
+  const result = {
     feed: `${instance.host}/${route}`,
     date: new Date(response.headers.get('last-modified') || Date.now()).toISOString(),
     title: feed.title,
     description: feed.description,
     link: feed.home_page_url,
-    items: feed.items.map((item) => ({
+    items: feed.items.map((item): RSSFeedItem => ({
       link: item.url,
       title: item.title,
-      description: item.content_html,
+      description: item.content_html === item.title ? '' : item.content_html,
       author: item.authors?.[0]?.name || '',
       date: item.date_published ? new Date(item.date_published).toISOString() : undefined,
     })),
   };
+
+  tryToPatchFeedItems(result.items);
+
+  return result;
 }
